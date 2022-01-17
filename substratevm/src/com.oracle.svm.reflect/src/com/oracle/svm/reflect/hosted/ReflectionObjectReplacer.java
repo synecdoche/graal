@@ -25,9 +25,7 @@
 package com.oracle.svm.reflect.hosted;
 
 import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -42,11 +40,6 @@ import com.oracle.graal.pointsto.meta.AnalysisType;
 import com.oracle.svm.core.annotate.Delete;
 
 import sun.reflect.generics.repository.AbstractRepository;
-import sun.reflect.generics.repository.ClassRepository;
-import sun.reflect.generics.repository.ConstructorRepository;
-import sun.reflect.generics.repository.FieldRepository;
-import sun.reflect.generics.repository.GenericDeclRepository;
-import sun.reflect.generics.repository.MethodRepository;
 import sun.reflect.generics.scope.AbstractScope;
 
 public class ReflectionObjectReplacer implements Function<Object, Object> {
@@ -88,99 +81,6 @@ public class ReflectionObjectReplacer implements Function<Object, Object> {
     }
 
     private void scan(Object original) {
-        /*
-         * Reflection accessors use Unsafe, so ensure that all reflectively accessible fields are
-         * registered as unsafe-accessible, whether they have been explicitly registered or their
-         * Field object is reachable in the image heap.
-         */
-
-        if (original instanceof Field) {
-            AnalysisType declaring = metaAccess.lookupJavaType(((Field) original).getDeclaringClass());
-            if (!GuardedAnnotationAccess.isAnnotationPresent(declaring, Delete.class)) {
-                // The declaring class must be reachable for the field lookup
-                declaring.registerAsReachable();
-                AnalysisField analysisField = metaAccess.lookupJavaField((Field) original);
-                if (analysisField == null) {
-                    /*
-                     * We are after static analysis, and the field has not been seen during the
-                     * static analysis. This is a corner case that happens when all static fields of
-                     * a type are iterated and read after static analysis. We can just ignore such
-                     * cases and not process the field.
-                     */
-                    return;
-                }
-                if (!GuardedAnnotationAccess.isAnnotationPresent(analysisField, Delete.class)) {
-                    ImageSingletons.lookup(ReflectionFeature.class).inspectAccessibleField((Field) original);
-
-                    if (!analysisField.isUnsafeAccessed()) {
-                        analysisField.registerAsAccessed();
-                        analysisField.registerAsUnsafeAccessed();
-                    }
-                }
-            }
-        }
-
-        /*
-         * Ensure that the generic info and annotations data structures are initialized. By calling
-         * the methods that access the metadata we ensure that the corresponding data structures are
-         * pre-loaded and cached in the native image heap, therefore no field value recomputation is
-         * required.
-         */
-
-        if (original instanceof Method) {
-            Method method = (Method) original;
-            method.getGenericReturnType();
-        }
-
-        if (original instanceof Executable) {
-            Executable executable = (Executable) original;
-            executable.getGenericParameterTypes();
-            executable.getGenericExceptionTypes();
-            executable.getParameters();
-            executable.getTypeParameters();
-        }
-
-        if (original instanceof Field) {
-            Field field = (Field) original;
-            field.getGenericType();
-        }
-
-        if (original instanceof AccessibleObject) {
-            AccessibleObject accessibleObject = (AccessibleObject) original;
-            GuardedAnnotationAccess.getDeclaredAnnotations(accessibleObject);
-        }
-
-        if (original instanceof Parameter) {
-            Parameter parameter = (Parameter) original;
-            parameter.getType();
-        }
-
-        if (original instanceof FieldRepository) {
-            FieldRepository fieldRepository = (FieldRepository) original;
-            fieldRepository.getGenericType();
-        }
-
-        if (original instanceof MethodRepository) {
-            MethodRepository methodRepository = (MethodRepository) original;
-            methodRepository.getReturnType();
-        }
-
-        if (original instanceof ConstructorRepository) {
-            ConstructorRepository constructorRepository = (ConstructorRepository) original;
-            constructorRepository.getExceptionTypes();
-            constructorRepository.getParameterTypes();
-        }
-
-        if (original instanceof GenericDeclRepository) {
-            GenericDeclRepository<?> methodRepository = (GenericDeclRepository<?>) original;
-            methodRepository.getTypeParameters();
-        }
-
-        if (original instanceof ClassRepository) {
-            ClassRepository classRepository = (ClassRepository) original;
-            classRepository.getSuperclass();
-            classRepository.getSuperInterfaces();
-        }
         if (original instanceof AbstractScope) {
             AbstractScope<?> abstractScope = (AbstractScope<?>) original;
             /*

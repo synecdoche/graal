@@ -67,7 +67,6 @@ import com.oracle.svm.core.VM;
 import com.oracle.svm.core.annotate.AutomaticFeature;
 import com.oracle.svm.core.code.CodeInfoTable;
 import com.oracle.svm.core.option.HostedOptionValues;
-import com.oracle.svm.core.reflect.MethodMetadataDecoder;
 import com.oracle.svm.core.util.VMError;
 import com.oracle.svm.hosted.code.CompileQueue.CompileTask;
 import com.oracle.svm.hosted.image.NativeImageHeap.ObjectInfo;
@@ -109,6 +108,7 @@ public class ProgressReporter {
     private GCStats lastGCStats = getCurrentGCStats();
     private long numRuntimeCompiledMethods = -1;
     private long graphEncodingByteLength = 0;
+    private long metadataByteLength = 0;
     private int numJNIClasses = -1;
     private int numJNIFields = -1;
     private int numJNIMethods = -1;
@@ -189,6 +189,10 @@ public class ProgressReporter {
 
     public void setGraphEncodingByteLength(int value) {
         graphEncodingByteLength = value;
+    }
+
+    public void setMetadataByteLength(int value) {
+        metadataByteLength = value;
     }
 
     public void setJNIInfo(int numClasses, int numFields, int numMethods) {
@@ -493,7 +497,6 @@ public class ProgressReporter {
             long codeInfoSize = CodeInfoTable.getImageCodeCache().getTotalByteArraySize();
             classNameToSize.put(BREAKDOWN_BYTE_ARRAY_PREFIX + linePrinter.asDocLink("code metadata", "#glossary-code-metadata"), codeInfoSize);
             remainingBytes -= codeInfoSize;
-            long metadataByteLength = ImageSingletons.lookup(MethodMetadataDecoder.class).getMetadataByteLength();
             if (metadataByteLength > 0) {
                 classNameToSize.put(BREAKDOWN_BYTE_ARRAY_PREFIX + linePrinter.asDocLink("method metadata", "#glossary-method-metadata"), metadataByteLength);
                 remainingBytes -= metadataByteLength;

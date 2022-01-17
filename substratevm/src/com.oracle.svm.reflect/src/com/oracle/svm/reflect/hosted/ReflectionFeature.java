@@ -57,7 +57,6 @@ import com.oracle.svm.core.util.VMError;
 import com.oracle.svm.hosted.FallbackFeature;
 import com.oracle.svm.hosted.FeatureImpl;
 import com.oracle.svm.hosted.FeatureImpl.DuringSetupAccessImpl;
-import com.oracle.svm.hosted.FeatureImpl.FeatureAccessImpl;
 import com.oracle.svm.hosted.ImageClassLoader;
 import com.oracle.svm.hosted.analysis.Inflation;
 import com.oracle.svm.hosted.config.ConfigurationParserUtils;
@@ -156,7 +155,7 @@ public class ReflectionFeature implements GraalFeature {
     public void afterRegistration(AfterRegistrationAccess access) {
         ModuleSupport.exportAndOpenPackageToUnnamed("java.base", "jdk.internal.reflect", false);
 
-        reflectionData = new ReflectionDataBuilder((FeatureAccessImpl) access);
+        reflectionData = new ReflectionDataBuilder();
         ImageSingletons.add(RuntimeReflectionSupport.class, reflectionData);
     }
 
@@ -174,7 +173,6 @@ public class ReflectionFeature implements GraalFeature {
 
         loader = access.getImageClassLoader();
         annotationSubstitutions = ((Inflation) access.getBigBang()).getAnnotationSubstitutionProcessor();
-        reflectionData.duringSetup(access);
     }
 
     @Override
