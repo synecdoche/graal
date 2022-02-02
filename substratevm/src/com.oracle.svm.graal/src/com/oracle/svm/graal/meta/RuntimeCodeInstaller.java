@@ -182,6 +182,7 @@ public class RuntimeCodeInstaller extends AbstractRuntimeCodeInstaller {
                             "No direct calls permitted: patching of runtime-compiled code intentionally not supported");
         }
 
+        RuntimeCodeInfoAccess.enableJitWriteProtect(false);
         prepareCodeMemory();
 
         /*
@@ -229,6 +230,8 @@ public class RuntimeCodeInstaller extends AbstractRuntimeCodeInstaller {
         patchDirectObjectConstants(objectConstants, codeInfo, adjuster);
 
         createCodeChunkInfos(codeInfo, adjuster);
+
+        RuntimeCodeInfoAccess.enableJitWriteProtect(true);
         compilation = null;
     }
 

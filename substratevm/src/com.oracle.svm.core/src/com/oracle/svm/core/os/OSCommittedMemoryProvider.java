@@ -98,7 +98,7 @@ public class OSCommittedMemoryProvider extends AbstractCommittedMemoryProvider {
         }
         Pointer reserved = WordFactory.nullPointer();
         if (!UnsignedUtils.isAMultiple(getGranularity(), alignment)) {
-            reserved = VirtualMemoryProvider.get().reserve(size, alignment);
+            reserved = VirtualMemoryProvider.get().reserve(size, alignment, executable);
             if (reserved.isNull()) {
                 return nullPointer();
             }
@@ -170,8 +170,12 @@ public class OSCommittedMemoryProvider extends AbstractCommittedMemoryProvider {
 class OSCommittedMemoryProviderFeature implements Feature {
     @Override
     public void beforeAnalysis(BeforeAnalysisAccess access) {
+        OSCommittedMemoryProvider memoryProvider = new OSCommittedMemoryProvider();
+        /* TODO: Remove this once GR-34673 is implemented */
+        ImageSingletons.add(OSCommittedMemoryProvider.class, memoryProvider);
+
         if (!ImageSingletons.contains(CommittedMemoryProvider.class)) {
-            ImageSingletons.add(CommittedMemoryProvider.class, new OSCommittedMemoryProvider());
+            ImageSingletons.add(CommittedMemoryProvider.class, memoryProvider);
         }
     }
 }
