@@ -198,9 +198,12 @@ public class RuntimeCodeInfoMemory {
     }
 
     private void visitCode(CodeInfoVisitor visitor, UntetheredCodeInfo info) {
-        RuntimeCodeInfoAccess.enableJitWriteProtect(false);
-        visitor.visitCode(CodeInfoAccess.convert(info));
-        RuntimeCodeInfoAccess.enableJitWriteProtect(true);
+        try {
+            RuntimeCodeInfoAccess.enableJitWriteProtect(false);
+            visitor.visitCode(CodeInfoAccess.convert(info));
+        } finally {
+            RuntimeCodeInfoAccess.enableJitWriteProtect(true);
+        }
     }
 
     public boolean walkRuntimeMethodsDuringGC(CodeInfoVisitor visitor) {

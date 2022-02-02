@@ -744,10 +744,10 @@ public final class GCImpl implements GC {
     private void blackenStackRoots() {
         Timer blackenStackRootsTimer = timers.blackenStackRoots.open();
         try {
+            RuntimeCodeInfoAccess.enableJitWriteProtect(false);
             Pointer sp = readCallerStackPointer();
             CodePointer ip = readReturnAddress();
 
-            RuntimeCodeInfoAccess.enableJitWriteProtect(false);
             JavaStackWalk walk = StackValue.get(JavaStackWalk.class);
             JavaStackWalker.initWalk(walk, sp, ip);
             walkStack(walk);
