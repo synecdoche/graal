@@ -201,6 +201,5 @@ public interface VirtualMemoryProvider {
      *            same pages turn to READ|WRITE.
      */
     default void jitWriteProtect(boolean protect) {
-        VMError.shouldNotReachHere();
     }
 }
