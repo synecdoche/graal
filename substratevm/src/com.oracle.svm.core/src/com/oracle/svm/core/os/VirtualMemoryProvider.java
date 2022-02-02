@@ -195,9 +195,10 @@ public interface VirtualMemoryProvider {
     /**
      * Toggle a thread-local flag that tells the OS our intention about the usage of pages that are
      * mapped with MAP_JIT. Only applicable on macOS. Only enforced on AArch64.
+     * 
      * @param protect If write protection is enabled, pages mapped with MAP_JIT have effectively
-     *                READ|EXEC permissions for the calling thread. If disabled, the permissions
-     *                for the same pages turn to READ|WRITE.
+     *            READ|EXEC permissions for the calling thread. If disabled, the permissions for the
+     *            same pages turn to READ|WRITE.
      */
     default void jitWriteProtect(boolean protect) {
         VMError.shouldNotReachHere();

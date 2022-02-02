@@ -160,7 +160,8 @@ public final class RuntimeCodeInfoAccess {
      */
     public static boolean walkStrongReferences(CodeInfo info, ObjectReferenceVisitor visitor) {
         enableJitWriteProtect(false);
-        boolean ret = NonmovableArrays.walkUnmanagedObjectArray(cast(info).getObjectFields(), visitor, CodeInfoImpl.FIRST_STRONGLY_REFERENCED_OBJFIELD, CodeInfoImpl.STRONGLY_REFERENCED_OBJFIELD_COUNT);
+        boolean ret = NonmovableArrays.walkUnmanagedObjectArray(cast(info).getObjectFields(), visitor, CodeInfoImpl.FIRST_STRONGLY_REFERENCED_OBJFIELD,
+                        CodeInfoImpl.STRONGLY_REFERENCED_OBJFIELD_COUNT);
         enableJitWriteProtect(true);
         return ret;
     }
@@ -260,14 +261,13 @@ public final class RuntimeCodeInfoAccess {
         CommittedMemoryProvider.get().protect(start, size, EnumSet.of(CommittedMemoryProvider.Access.READ, CommittedMemoryProvider.Access.WRITE));
     }
 
-    @Platforms(Platform.DARWIN_AARCH64.class)
-    private static final FastThreadLocalInt jitProtectDepth = FastThreadLocalFactory.createInt("jitProtectDepth");
+    @Platforms(Platform.DARWIN_AARCH64.class) private static final FastThreadLocalInt jitProtectDepth = FastThreadLocalFactory.createInt("jitProtectDepth");
 
     public static void enableJitWriteProtect(boolean protect) {
         if (Platform.includedIn(Platform.DARWIN_AARCH64.class)) {
-            // Disabling write protection can be nested, for example a GC can be triggered during code installation
-            // which in turn causes walk of references in code. Both need to disable write protection, but only the
-            // outer one should enable it again.
+            // Disabling write protection can be nested, for example a GC can be triggered during
+            // code installation which in turn causes walk of references in code. Both need to
+            // disable write protection, but only the outer one should enable it again.
             if (!protect) {
                 if (jitProtectDepth.get() == 0) {
                     VirtualMemoryProvider.get().jitWriteProtect(protect);
