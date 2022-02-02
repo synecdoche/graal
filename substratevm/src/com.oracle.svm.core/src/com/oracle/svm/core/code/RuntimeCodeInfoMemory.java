@@ -197,6 +197,12 @@ public class RuntimeCodeInfoMemory {
         }
     }
 
+    private void visitCode(CodeInfoVisitor visitor, UntetheredCodeInfo info) {
+        RuntimeCodeInfoAccess.enableJitWriteProtect(false);
+        visitor.visitCode(CodeInfoAccess.convert(info));
+        RuntimeCodeInfoAccess.enableJitWriteProtect(true);
+    }
+
     public boolean walkRuntimeMethodsDuringGC(CodeInfoVisitor visitor) {
         assert VMOperation.isGCInProgress() : "otherwise, we would need to make sure that the CodeInfo is not freeded by the GC";
         if (table.isNonNull()) {
@@ -204,7 +210,7 @@ public class RuntimeCodeInfoMemory {
             for (int i = 0; i < length;) {
                 UntetheredCodeInfo info = NonmovableArrays.getWord(table, i);
                 if (info.isNonNull()) {
-                    visitor.visitCode(CodeInfoAccess.convert(info));
+                    visitCode(visitor, info);
                 }
 
                 // If the visitor removed the current entry from the table, then it is necessary to
@@ -225,7 +231,7 @@ public class RuntimeCodeInfoMemory {
             for (int i = 0; i < length;) {
                 UntetheredCodeInfo info = NonmovableArrays.getWord(table, i);
                 if (info.isNonNull()) {
-                    visitor.visitCode(CodeInfoAccess.convert(info));
+                    visitCode(visitor, info);
                 }
                 assert info == NonmovableArrays.getWord(table, i);
             }

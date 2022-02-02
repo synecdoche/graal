@@ -747,6 +747,7 @@ public final class GCImpl implements GC {
             Pointer sp = readCallerStackPointer();
             CodePointer ip = readReturnAddress();
 
+            RuntimeCodeInfoAccess.enableJitWriteProtect(false);
             JavaStackWalk walk = StackValue.get(JavaStackWalk.class);
             JavaStackWalker.initWalk(walk, sp, ip);
             walkStack(walk);
@@ -773,6 +774,7 @@ public final class GCImpl implements GC {
             }
         } finally {
             blackenStackRootsTimer.close();
+            RuntimeCodeInfoAccess.enableJitWriteProtect(true);
         }
     }
 

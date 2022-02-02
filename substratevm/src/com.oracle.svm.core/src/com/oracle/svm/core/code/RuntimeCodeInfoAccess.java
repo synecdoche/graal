@@ -159,11 +159,7 @@ public final class RuntimeCodeInfoAccess {
      * Walks all strong references in a {@link CodeInfo} object.
      */
     public static boolean walkStrongReferences(CodeInfo info, ObjectReferenceVisitor visitor) {
-        enableJitWriteProtect(false);
-        boolean ret = NonmovableArrays.walkUnmanagedObjectArray(cast(info).getObjectFields(), visitor, CodeInfoImpl.FIRST_STRONGLY_REFERENCED_OBJFIELD,
-                        CodeInfoImpl.STRONGLY_REFERENCED_OBJFIELD_COUNT);
-        enableJitWriteProtect(true);
-        return ret;
+        return NonmovableArrays.walkUnmanagedObjectArray(cast(info).getObjectFields(), visitor, CodeInfoImpl.FIRST_STRONGLY_REFERENCED_OBJFIELD, CodeInfoImpl.STRONGLY_REFERENCED_OBJFIELD_COUNT);
     }
 
     /**
@@ -171,8 +167,6 @@ public final class RuntimeCodeInfoAccess {
      */
     @DuplicatedInNativeCode
     public static boolean walkWeakReferences(CodeInfo info, ObjectReferenceVisitor visitor) {
-        enableJitWriteProtect(false);
-
         CodeInfoImpl impl = cast(info);
         boolean continueVisiting = true;
         continueVisiting = continueVisiting &&
@@ -185,8 +179,6 @@ public final class RuntimeCodeInfoAccess {
         continueVisiting = continueVisiting && NonmovableArrays.walkUnmanagedObjectArray(impl.getFrameInfoSourceClasses(), visitor);
         continueVisiting = continueVisiting && NonmovableArrays.walkUnmanagedObjectArray(impl.getFrameInfoSourceMethodNames(), visitor);
         continueVisiting = continueVisiting && NonmovableArrays.walkUnmanagedObjectArray(impl.getDeoptimizationObjectConstants(), visitor);
-
-        enableJitWriteProtect(true);
         return continueVisiting;
     }
 
