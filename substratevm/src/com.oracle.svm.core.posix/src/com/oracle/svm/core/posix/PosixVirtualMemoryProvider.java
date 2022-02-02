@@ -195,6 +195,7 @@ public class PosixVirtualMemoryProvider implements VirtualMemoryProvider {
     }
 
     @Override
+    @Uninterruptible(reason = "Called from uninterruptible code.", mayBeInlined = true)
     public void jitWriteProtect(boolean protect) {
         DarwinPthread.pthread_jit_write_protect_np(protect ? 1 : 0);
     }

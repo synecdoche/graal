@@ -255,6 +255,7 @@ public final class RuntimeCodeInfoAccess {
 
     @Platforms(Platform.DARWIN_AARCH64.class) private static final FastThreadLocalInt jitProtectDepth = FastThreadLocalFactory.createInt("jitProtectDepth");
 
+    @Uninterruptible(reason = "Called from uninterruptible code.", mayBeInlined = true)
     public static void enableJitWriteProtect(boolean protect) {
         if (Platform.includedIn(Platform.DARWIN_AARCH64.class)) {
             // Disabling write protection can be nested, for example a GC can be triggered during
