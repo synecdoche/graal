@@ -25,7 +25,6 @@
 package com.oracle.svm.core.os;
 
 import com.oracle.svm.core.annotate.Uninterruptible;
-import com.oracle.svm.core.util.VMError;
 import org.graalvm.compiler.api.replacements.Fold;
 import org.graalvm.nativeimage.ImageSingletons;
 import org.graalvm.word.Pointer;

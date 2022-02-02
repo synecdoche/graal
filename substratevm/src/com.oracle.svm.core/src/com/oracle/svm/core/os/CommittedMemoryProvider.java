@@ -26,7 +26,6 @@ package com.oracle.svm.core.os;
 
 import java.util.EnumSet;
 
-import com.oracle.svm.core.util.UnsignedUtils;
 import org.graalvm.compiler.api.replacements.Fold;
 import org.graalvm.nativeimage.ImageSingletons;
 import org.graalvm.nativeimage.c.type.WordPointer;
@@ -38,8 +37,6 @@ import org.graalvm.word.WordFactory;
 import com.oracle.svm.core.annotate.Uninterruptible;
 import com.oracle.svm.core.c.function.CEntryPointCreateIsolateParameters;
 import com.oracle.svm.core.heap.Heap;
-
-import static org.graalvm.word.WordFactory.nullPointer;
 
 /**
  * A provider of ranges of committed memory, which is virtual memory that is backed by physical
