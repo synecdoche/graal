@@ -102,15 +102,6 @@ public class PosixVirtualMemoryProvider implements VirtualMemoryProvider {
         return prot;
     }
 
-    @Uninterruptible(reason = "May be called from uninterruptible code.", mayBeInlined = true)
-    protected static boolean needsMapJit(int access) {
-        if (!Platform.includedIn(Platform.DARWIN_AARCH64.class)) {
-            return false;
-        }
-
-        return (access & Access.WRITE) != 0 && (access & Access.EXECUTE) != 0;
-    }
-
     @Override
     @Uninterruptible(reason = "May be called from uninterruptible code.", mayBeInlined = true)
     public UnsignedWord getGranularity() {
@@ -183,7 +174,9 @@ public class PosixVirtualMemoryProvider implements VirtualMemoryProvider {
         if (start.isNonNull()) {
             flags |= MAP_FIXED();
         }
-        if (needsMapJit(access)) {
+
+        boolean isWX = (access & Access.WRITE) != 0 && (access & Access.EXECUTE) != 0;
+        if (Platform.includedIn(Platform.DARWIN_AARCH64.class) && isWX) {
             flags |= MAP_JIT();
         }
         /* The memory returned by mmap is guaranteed to be zeroed. */
