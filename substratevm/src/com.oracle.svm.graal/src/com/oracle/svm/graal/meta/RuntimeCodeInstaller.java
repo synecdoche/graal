@@ -187,8 +187,8 @@ public class RuntimeCodeInstaller extends AbstractRuntimeCodeInstaller {
             prepareCodeMemory();
 
             /*
-             * Object reference constants are stored in this holder first, then written and made visible
-             * in a single step that is atomic regarding to GC.
+             * Object reference constants are stored in this holder first, then written and made
+             * visible in a single step that is atomic regarding to GC.
              */
             ObjectConstantsHolder objectConstants = new ObjectConstantsHolder(compilation);
 
@@ -217,8 +217,8 @@ public class RuntimeCodeInstaller extends AbstractRuntimeCodeInstaller {
             ByteBuffer dataBuffer = CTypeConversion.asByteBuffer(code.add(dataOffset), compilation.getDataSection().getSectionSize());
             compilation.getDataSection().buildDataSection(dataBuffer, (position, constant) -> {
                 objectConstants.add(dataOffset + position,
-                        ConfigurationValues.getObjectLayout().getReferenceSize(),
-                        (SubstrateObjectConstant) constant);
+                                ConfigurationValues.getObjectLayout().getReferenceSize(),
+                                (SubstrateObjectConstant) constant);
             });
 
             NonmovableArray<InstalledCodeObserverHandle> observerHandles = InstalledCodeObserverSupport.installObservers(codeObservers);

@@ -72,8 +72,6 @@ public class OSCommittedMemoryProvider extends AbstractCommittedMemoryProvider {
         return ImageHeapProvider.get().freeImageHeap(heapBase);
     }
 
-
-
     private final VirtualMemoryTracker tracker = new VirtualMemoryTracker();
 
     @Override
