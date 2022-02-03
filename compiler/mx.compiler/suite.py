@@ -2140,6 +2140,49 @@ suite = {
       "maven": False,
     },
 
+    "TWITTER_TEST" : {
+      "subDir" : "src",
+      "dependencies" : [
+        "org.graalvm.compiler.api.directives.test",
+        "org.graalvm.compiler.api.test",
+        "org.graalvm.compiler.asm.aarch64.test",
+        "org.graalvm.compiler.asm.amd64.test",
+        "org.graalvm.compiler.core.aarch64.test",
+        "org.graalvm.compiler.core.amd64.test",
+        "org.graalvm.compiler.core.jdk9.test",
+        "org.graalvm.compiler.debug.test",
+        "org.graalvm.compiler.hotspot.aarch64.test",
+        "org.graalvm.compiler.hotspot.amd64.test",
+        "org.graalvm.compiler.hotspot.jdk15.test",
+        "org.graalvm.compiler.hotspot.jdk16.test",
+        "org.graalvm.compiler.hotspot.jdk9.test",
+        "org.graalvm.compiler.hotspot.jdk9.test",
+        "org.graalvm.compiler.hotspot.lir.test",
+        "org.graalvm.compiler.jtt",
+        "org.graalvm.compiler.lir.jtt",
+        "org.graalvm.compiler.lir.test",
+        "org.graalvm.compiler.loop.test",
+        "org.graalvm.compiler.nodes.test",
+        "org.graalvm.compiler.options.test",
+        "org.graalvm.compiler.phases.common.test",
+        "org.graalvm.compiler.replacements.jdk10.test",
+        "org.graalvm.compiler.replacements.jdk12.test",
+        "org.graalvm.compiler.replacements.jdk9.test",
+        "org.graalvm.compiler.replacements.jdk9_11.test",
+        "org.graalvm.compiler.test",
+        "org.graalvm.util.test",
+      ],
+      "distDependencies" : [
+        "JVMCI_HOTSPOT",
+        "GRAAL",
+      ],
+      "exclude" : [
+        "mx:JUNIT",
+        "JAVA_ALLOCATION_INSTRUMENTER",
+      ],
+      "maven": False,
+    },
+
     "GRAAL_TRUFFLE_JFR_IMPL" : {
       # This distribution defines a module.
       "moduleInfo" : {
