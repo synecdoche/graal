@@ -28,6 +28,7 @@ import java.util.List;
 
 import com.oracle.graal.pointsto.meta.AnalysisMetaAccess;
 
+import com.oracle.svm.core.SubstrateOptions;
 import com.oracle.svm.hosted.AnalyzeJavaHomeAccessFeature;
 import jdk.graal.compiler.graph.NodeSourcePosition;
 import jdk.graal.compiler.nodes.StructuredGraph;
@@ -43,11 +44,10 @@ import jdk.vm.ci.meta.ResolvedJavaType;
  * image-build time recommendation to set java.home when running the binary if a usage has been
  * detected. It is an optional phase that happens after
  * {@link com.oracle.graal.pointsto.results.StrengthenGraphs} by using the
- * {@link com.oracle.svm.hosted.AnalyzeJavaHomeAccessFeature.Options#TrackJavaHomeAccess} option.
- * Additionally, using the
- * {@link com.oracle.svm.hosted.AnalyzeJavaHomeAccessFeature.Options#TrackJavaHomeAccessDetailed}
- * option, the phase can print the locations of all the previously found
- * <code>System.getProperty("java.home")</code> calls.
+ * {@link com.oracle.svm.core.SubstrateOptions#TrackJavaHomeAccess} option. Additionally, using the
+ * {@link com.oracle.svm.core.SubstrateOptions#TrackJavaHomeAccessDetailed} option, the phase can
+ * print the locations of all the previously found <code>System.getProperty("java.home")</code>
+ * calls.
  */
 public class AnalyzeJavaHomeAccessPhase extends BasePhase<CoreProviders> {
     public static final String GET_PROPERTY_FUNCTION_NAME = "getProperty";

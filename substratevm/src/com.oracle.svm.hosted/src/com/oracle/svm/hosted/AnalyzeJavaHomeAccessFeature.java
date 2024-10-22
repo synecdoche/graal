@@ -74,19 +74,4 @@ public class AnalyzeJavaHomeAccessFeature implements InternalFeature {
     public void beforeCompilation(BeforeCompilationAccess access) {
         AnalyzeJavaHomeAccessFeature.instance().printJavaHomeUsageLocations();
     }
-
-    public static class Options {
-        @Option(help = "Track System.getProperty(\\\"java.home\\\") usage in reachable parts of the project.")//
-        public static final HostedOptionKey<Boolean> TrackJavaHomeAccess = new HostedOptionKey<>(false);
-
-        @Option(help = "Output all System.getProperty(\\\"java.home\\\") calls in reachable parts of the project.")//
-        public static final HostedOptionKey<Boolean> TrackJavaHomeAccessDetailed = new HostedOptionKey<>(false) {
-            @Override
-            protected void onValueUpdate(EconomicMap<OptionKey<?>, Object> values, Boolean oldValue, Boolean newValue) {
-                if (newValue) {
-                    TrackJavaHomeAccess.update(values, true);
-                }
-            }
-        };
-    }
 }
