@@ -89,6 +89,11 @@ public final class MetadataTracer {
         config.getResourceConfiguration().addBundle(UnresolvedConfigurationCondition.alwaysTrue(), baseName, List.of(locale));
     }
 
+    public void traceSerializationType(String className) {
+        assert enabled();
+        config.getReflectionConfiguration().getOrCreateType(UnresolvedConfigurationCondition.alwaysTrue(), className).setSerializable();
+    }
+
     private static void initialize() {
         assert Options.MetadataTracingSupport.getValue();
         MetadataTracer singleton = MetadataTracer.singleton();
