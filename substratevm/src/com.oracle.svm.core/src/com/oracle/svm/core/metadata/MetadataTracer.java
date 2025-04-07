@@ -36,6 +36,7 @@ import org.graalvm.nativeimage.hosted.Feature;
 import org.graalvm.nativeimage.impl.UnresolvedConfigurationCondition;
 
 import com.oracle.svm.configure.config.ConfigurationSet;
+import com.oracle.svm.configure.config.ConfigurationType;
 import com.oracle.svm.core.feature.AutomaticallyRegisteredFeature;
 import com.oracle.svm.core.feature.InternalFeature;
 import com.oracle.svm.core.jdk.RuntimeSupport;
@@ -77,6 +78,11 @@ public final class MetadataTracer {
     public boolean enabled() {
         VMError.guarantee(Options.MetadataTracingSupport.getValue());
         return config != null;
+    }
+
+    public ConfigurationType traceJNIType(String className) {
+        assert enabled();
+        return config.getJniConfiguration().getOrCreateType(UnresolvedConfigurationCondition.alwaysTrue(), className);
     }
 
     public void traceResource(String resourceName, String moduleName) {
