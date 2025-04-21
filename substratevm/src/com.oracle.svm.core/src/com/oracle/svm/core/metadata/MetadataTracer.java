@@ -80,6 +80,11 @@ public final class MetadataTracer {
         return config != null;
     }
 
+    public ConfigurationType traceReflectionType(String className) {
+        assert enabled();
+        return config.getReflectionConfiguration().getOrCreateType(UnresolvedConfigurationCondition.alwaysTrue(), className);
+    }
+
     public ConfigurationType traceJNIType(String className) {
         assert enabled();
         return config.getJniConfiguration().getOrCreateType(UnresolvedConfigurationCondition.alwaysTrue(), className);
