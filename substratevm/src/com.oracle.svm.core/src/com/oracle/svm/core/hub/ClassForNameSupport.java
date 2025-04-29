@@ -36,6 +36,7 @@ import org.graalvm.nativeimage.Platform.HOSTED_ONLY;
 import org.graalvm.nativeimage.Platforms;
 import org.graalvm.nativeimage.impl.ConfigurationCondition;
 
+import com.oracle.svm.configure.config.ConfigurationType;
 import com.oracle.svm.core.configure.ConditionalRuntimeValue;
 import com.oracle.svm.core.configure.RuntimeConditionSet;
 import com.oracle.svm.core.feature.AutomaticallyRegisteredImageSingleton;
@@ -282,7 +283,10 @@ public final class ClassForNameSupport implements MultiLayeredImageSingleton, Un
         }
         if (conditionSet != null) {
             if (MetadataTracer.Options.MetadataTracingSupport.getValue() && MetadataTracer.singleton().enabled()) {
-                MetadataTracer.singleton().traceReflectionType(clazz.getName()).setUnsafeAllocated();
+                ConfigurationType type = MetadataTracer.singleton().traceReflectionType(clazz.getName());
+                if (type != null) {
+                    type.setUnsafeAllocated();
+                }
             }
             return conditionSet.satisfied();
         }

@@ -66,7 +66,7 @@ public final class MetadataTracer {
         public static final RuntimeOptionKey<String> RecordMetadata = new RuntimeOptionKey<>("");
     }
 
-    private ConfigurationSet config;
+    private volatile ConfigurationSet config;
 
     private Path recordMetadataPath;
 
@@ -75,34 +75,75 @@ public final class MetadataTracer {
         return ImageSingletons.lookup(MetadataTracer.class);
     }
 
+    /**
+     * Returns whether tracing is enabled at run time (using {@code -XX:RecordMetadata=path}).
+     */
     public boolean enabled() {
         VMError.guarantee(Options.MetadataTracingSupport.getValue());
-        return config != null;
+        return recordMetadataPath != null;
     }
 
+    /**
+     * Marks the given type as reachable from reflection.
+     *
+     * @return the corresponding {@link ConfigurationType} or {@code null} if tracing is not active
+     *         (e.g., during shutdown).
+     */
     public ConfigurationType traceReflectionType(String className) {
         assert enabled();
-        return config.getReflectionConfiguration().getOrCreateType(UnresolvedConfigurationCondition.alwaysTrue(), className);
+        ConfigurationSet configurationSet = config;
+        if (configurationSet != null) {
+            return configurationSet.getReflectionConfiguration().getOrCreateType(UnresolvedConfigurationCondition.alwaysTrue(), className);
+        }
+        return null;
     }
 
+    /**
+     * Marks the given type as reachable from JNI.
+     *
+     * @return the corresponding {@link ConfigurationType} or {@code null} if tracing is not active
+     *         (e.g., during shutdown).
+     */
     public ConfigurationType traceJNIType(String className) {
         assert enabled();
-        return config.getJniConfiguration().getOrCreateType(UnresolvedConfigurationCondition.alwaysTrue(), className);
+        ConfigurationSet configurationSet = config;
+        if (configurationSet != null) {
+            return configurationSet.getJniConfiguration().getOrCreateType(UnresolvedConfigurationCondition.alwaysTrue(), className);
+        }
+        return null;
     }
 
+    /**
+     * Marks the given resource within the given (optional) module as reachable.
+     */
     public void traceResource(String resourceName, String moduleName) {
         assert enabled();
-        config.getResourceConfiguration().addGlobPattern(UnresolvedConfigurationCondition.alwaysTrue(), resourceName, moduleName);
+        ConfigurationSet configurationSet = config;
+        if (configurationSet != null) {
+            configurationSet.getResourceConfiguration().addGlobPattern(UnresolvedConfigurationCondition.alwaysTrue(), resourceName, moduleName);
+        }
     }
 
+    /**
+     * Marks the given resource bundle within the given locale as reachable.
+     */
     public void traceResourceBundle(String baseName, Locale locale) {
         assert enabled();
-        config.getResourceConfiguration().addBundle(UnresolvedConfigurationCondition.alwaysTrue(), baseName, List.of(locale));
+        ConfigurationSet configurationSet = config;
+        if (configurationSet != null) {
+            configurationSet.getResourceConfiguration().addBundle(UnresolvedConfigurationCondition.alwaysTrue(), baseName, List.of(locale));
+        }
     }
 
+    /**
+     * Marks the given type as serializable.
+     */
     public void traceSerializationType(String className) {
         assert enabled();
-        config.getReflectionConfiguration().getOrCreateType(UnresolvedConfigurationCondition.alwaysTrue(), className).setSerializable();
+        ConfigurationSet configurationSet = config;
+        if (configurationSet != null) {
+            configurationSet.getReflectionConfiguration().getOrCreateType(UnresolvedConfigurationCondition.alwaysTrue(), className).setSerializable();
+        }
     }
 
     private static void initialize() {
@@ -126,6 +167,7 @@ public final class MetadataTracer {
         assert Options.MetadataTracingSupport.getValue();
         MetadataTracer singleton = MetadataTracer.singleton();
         ConfigurationSet config = singleton.config;
+        singleton.config = null; // clear config so that shutdown events are not traced.
         if (config != null) {
             try {
                 config.writeConfiguration(configFile -> singleton.recordMetadataPath.resolve(configFile.getFileName()));
