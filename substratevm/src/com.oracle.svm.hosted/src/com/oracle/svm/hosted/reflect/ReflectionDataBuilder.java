@@ -650,12 +650,7 @@ public class ReflectionDataBuilder extends ConditionalConfigurationRegistry impl
         Class<?> annotationClass = method.getDeclaringClass();
         Class<?> proxyClass = Proxy.getProxyClass(annotationClass.getClassLoader(), annotationClass);
         try {
-            /*
-             * build-time condition as it is registered during analysis GR-62516, this should be
-             * deleted
-             */
-            var condition = TypeReachabilityCondition.create(proxyClass, false);
-            register(condition, queriedOnly, proxyClass.getDeclaredMethod(method.getName(), method.getParameterTypes()));
+            register(RegistrationCondition.always(), queriedOnly, proxyClass.getDeclaredMethod(method.getName(), method.getParameterTypes()));
         } catch (NoSuchMethodException e) {
             /*
              * The annotation member is not present in the proxy class so we don't add it.
