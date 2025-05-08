@@ -296,7 +296,7 @@ public class LocalizationSupport {
         }
         if (registeredBundles.containsKey(baseName)) {
             if (MetadataTracer.Options.MetadataTracingSupport.getValue() && MetadataTracer.singleton().enabled()) {
-                MetadataTracer.singleton().traceResourceBundle(baseName, locale);
+                MetadataTracer.singleton().traceResourceBundle(baseName);
             }
             return registeredBundles.get(baseName).satisfied();
         }

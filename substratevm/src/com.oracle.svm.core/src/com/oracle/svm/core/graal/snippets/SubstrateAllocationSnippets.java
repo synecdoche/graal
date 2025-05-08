@@ -371,10 +371,7 @@ public class SubstrateAllocationSnippets extends AllocationSnippets {
                 DynamicHub nonNullArrayHub = (DynamicHub) PiNode.piCastNonNull(arrayHub, SnippetAnchorNode.anchor());
                 if (probability(EXTREMELY_FAST_PATH_PROBABILITY, nonNullArrayHub.isInstantiated())) {
                     if (MetadataTracer.Options.MetadataTracingSupport.getValue()) {
-                        Class<?> clazz = DynamicHub.toClass(elementType);
-                        if (!clazz.isPrimitive()) {
-                            callTraceArrayHubStub(TRACE_ARRAY_HUB, clazz);
-                        }
+                        callTraceArrayHubStub(TRACE_ARRAY_HUB, DynamicHub.toClass(elementType));
                     }
                     return nonNullArrayHub;
                 }

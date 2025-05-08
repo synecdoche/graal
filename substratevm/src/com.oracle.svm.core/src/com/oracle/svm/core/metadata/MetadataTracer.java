@@ -29,7 +29,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Locale;
 
 import org.graalvm.nativeimage.ImageSingletons;
 import org.graalvm.nativeimage.hosted.Feature;
@@ -127,11 +126,11 @@ public final class MetadataTracer {
     /**
      * Marks the given resource bundle within the given locale as reachable.
      */
-    public void traceResourceBundle(String baseName, Locale locale) {
+    public void traceResourceBundle(String baseName) {
         assert enabled();
         ConfigurationSet configurationSet = config;
         if (configurationSet != null) {
-            configurationSet.getResourceConfiguration().addBundle(UnresolvedConfigurationCondition.alwaysTrue(), baseName, List.of(locale));
+            configurationSet.getResourceConfiguration().addBundle(UnresolvedConfigurationCondition.alwaysTrue(), baseName, List.of());
         }
     }
 

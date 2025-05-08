@@ -89,6 +89,7 @@ import org.graalvm.nativeimage.Platforms;
 import org.graalvm.nativeimage.c.function.CFunctionPointer;
 
 import com.oracle.svm.configure.config.ConfigurationType;
+import com.oracle.svm.configure.config.SignatureUtil;
 import com.oracle.svm.core.BuildPhaseProvider.AfterHostedUniverse;
 import com.oracle.svm.core.BuildPhaseProvider.CompileQueueFinished;
 import com.oracle.svm.core.NeverInline;
@@ -147,7 +148,6 @@ import jdk.internal.reflect.ConstructorAccessor;
 import jdk.internal.reflect.FieldAccessor;
 import jdk.internal.reflect.Reflection;
 import jdk.internal.reflect.ReflectionFactory;
-import jdk.vm.ci.meta.MetaUtil;
 import jdk.vm.ci.meta.ResolvedJavaType;
 import sun.reflect.annotation.AnnotationType;
 import sun.reflect.generics.factory.GenericsFactory;
@@ -719,10 +719,10 @@ public final class DynamicHub implements AnnotatedElement, java.lang.reflect.Typ
         switch (mask) {
             case ALL_FIELDS_FLAG -> type.setAllPublicFields(ConfigurationMemberAccessibility.ACCESSED);
             case ALL_DECLARED_FIELDS_FLAG -> type.setAllDeclaredFields(ConfigurationMemberAccessibility.ACCESSED);
-            case ALL_METHODS_FLAG -> type.setAllPublicMethods(ConfigurationMemberAccessibility.QUERIED);
-            case ALL_DECLARED_METHODS_FLAG -> type.setAllDeclaredMethods(ConfigurationMemberAccessibility.QUERIED);
-            case ALL_CONSTRUCTORS_FLAG -> type.setAllPublicConstructors(ConfigurationMemberAccessibility.QUERIED);
-            case ALL_DECLARED_CONSTRUCTORS_FLAG -> type.setAllDeclaredConstructors(ConfigurationMemberAccessibility.QUERIED);
+            case ALL_METHODS_FLAG -> type.setAllPublicMethods(ConfigurationMemberAccessibility.ACCESSED);
+            case ALL_DECLARED_METHODS_FLAG -> type.setAllDeclaredMethods(ConfigurationMemberAccessibility.ACCESSED);
+            case ALL_CONSTRUCTORS_FLAG -> type.setAllPublicConstructors(ConfigurationMemberAccessibility.ACCESSED);
+            case ALL_DECLARED_CONSTRUCTORS_FLAG -> type.setAllDeclaredConstructors(ConfigurationMemberAccessibility.ACCESSED);
             case ALL_CLASSES_FLAG -> type.setAllPublicClasses();
             case ALL_DECLARED_CLASSES_FLAG -> type.setAllDeclaredClasses();
             case ALL_RECORD_COMPONENTS_FLAG -> type.setAllRecordComponents();
@@ -1386,13 +1386,16 @@ public final class DynamicHub implements AnnotatedElement, java.lang.reflect.Typ
     }
 
     private static String toInternalSignature(Class<?>[] classes) {
-        StringBuilder sb = new StringBuilder("(");
-        if (classes != null) {
-            for (Class<?> clazz : classes) {
-                sb.append(MetaUtil.toInternalName(clazz.getName()));
+        List<String> names;
+        if (classes == null) {
+            names = List.of();
+        } else {
+            names = new ArrayList<>(classes.length);
+            for (int i = 0; i < classes.length; i++) {
+                names.set(i, classes[i].getName());
             }
         }
-        return sb.append(')').toString();
+        return SignatureUtil.toInternalSignature(names);
     }
 
     private boolean allElementsRegistered(boolean publicOnly, int allDeclaredElementsFlag, int allPublicElementsFlag) {
@@ -1884,7 +1887,7 @@ public final class DynamicHub implements AnnotatedElement, java.lang.reflect.Typ
         }
         if (companion.arrayHub == null) {
             MissingReflectionRegistrationUtils.forClass(getTypeName() + "[]");
-        } else if (MetadataTracer.Options.MetadataTracingSupport.getValue() && MetadataTracer.singleton().enabled() && !isPrimitive()) {
+        } else if (MetadataTracer.Options.MetadataTracingSupport.getValue() && MetadataTracer.singleton().enabled()) {
             MetadataTracer.singleton().traceReflectionType(companion.arrayHub.getTypeName());
         }
         return companion.arrayHub;
