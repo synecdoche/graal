@@ -535,6 +535,18 @@ public class ReflectionDataBuilder extends ConditionalConfigurationRegistry impl
         registerAllFieldsQuery(condition, false, clazz);
     }
 
+    @Override
+    public void registerAllFieldsQueryFlag(ConfigurationCondition condition, Class<?> clazz) {
+        guaranteeNotRuntimeConditionForQueries(condition, true);
+        runConditionalInAnalysisTask(condition, (cnd) -> setQueryFlag(clazz, ALL_FIELDS_FLAG));
+    }
+
+    @Override
+    public void registerAllMethodsQueryFlag(ConfigurationCondition condition, Class<?> clazz) {
+        guaranteeNotRuntimeConditionForQueries(condition, true);
+        runConditionalInAnalysisTask(condition, (cnd) -> setQueryFlag(clazz, ALL_METHODS_FLAG));
+    }
+
     public void registerAllFieldsQuery(ConfigurationCondition condition, boolean queriedOnly, Class<?> clazz) {
         guaranteeNotRuntimeConditionForQueries(condition, queriedOnly);
         runConditionalInAnalysisTask(condition, (cnd) -> {

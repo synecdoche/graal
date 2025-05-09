@@ -24,12 +24,23 @@
  */
 package com.oracle.svm.hosted.image;
 
+import static com.oracle.graal.pointsto.api.PointstoOptions.UseConservativeUnsafeAccess;
+import static com.oracle.svm.core.SubstrateOptions.Preserve;
+
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import org.graalvm.collections.EconomicMap;
+import org.graalvm.nativeimage.ImageSingletons;
+import org.graalvm.nativeimage.hosted.RuntimeReflection;
+import org.graalvm.nativeimage.impl.ConfigurationCondition;
+import org.graalvm.nativeimage.impl.RuntimeReflectionSupport;
 
+import com.oracle.graal.pointsto.ClassInclusionPolicy;
 import com.oracle.svm.core.SubstrateOptions;
 import com.oracle.svm.core.option.AccumulatingLocatableMultiOptionValue;
 import com.oracle.svm.core.option.LocatableMultiOptionValue;
@@ -37,6 +48,7 @@ import com.oracle.svm.core.option.SubstrateOptionsParser;
 import com.oracle.svm.core.util.UserError;
 import com.oracle.svm.hosted.NativeImageClassLoaderSupport;
 import com.oracle.svm.hosted.driver.IncludeOptionsSupport;
+import com.oracle.svm.util.ReflectionUtil;
 
 import jdk.graal.compiler.options.OptionKey;
 import jdk.graal.compiler.options.OptionValues;
@@ -93,7 +105,8 @@ public class PreserveOptionsSupport extends IncludeOptionsSupport {
     }
 
     public static void parsePreserveOption(EconomicMap<OptionKey<?>, Object> hostedValues, NativeImageClassLoaderSupport classLoaderSupport) {
-        AccumulatingLocatableMultiOptionValue.Strings preserve = SubstrateOptions.Preserve.getValue(new OptionValues(hostedValues));
+        OptionValues optionValues = new OptionValues(hostedValues);
+        AccumulatingLocatableMultiOptionValue.Strings preserve = SubstrateOptions.Preserve.getValue(optionValues);
         Stream<LocatableMultiOptionValue.ValueWithOrigin<String>> valuesWithOrigins = preserve.getValuesWithOrigins();
         valuesWithOrigins.forEach(valueWithOrigin -> {
             String optionArgument = SubstrateOptionsParser.commandArgument(SubstrateOptions.Preserve, valueWithOrigin.value(), true, false);
@@ -112,5 +125,35 @@ public class PreserveOptionsSupport extends IncludeOptionsSupport {
                 }
             }
         });
+        if (classLoaderSupport.isPreserveMode()) {
+            if (UseConservativeUnsafeAccess.hasBeenSet(optionValues)) {
+                UserError.guarantee(UseConservativeUnsafeAccess.getValue(optionValues), "%s can not be used together with %s. Please unset %s.",
+                                SubstrateOptionsParser.commandArgument(UseConservativeUnsafeAccess, "-"),
+                                SubstrateOptionsParser.commandArgument(Preserve, "<value>"),
+                                SubstrateOptionsParser.commandArgument(UseConservativeUnsafeAccess, "-"));
+            }
+            UseConservativeUnsafeAccess.update(hostedValues, true);
+        }
+    }
+
+    public static void registerPreservedClasses(NativeImageClassLoaderSupport classLoaderSupport) {
+        var classesOrPackagesToIgnore = ignoredClassesOrPackagesForPreserve();
+        classLoaderSupport.getClassesToPreserve()
+                        .filter(ClassInclusionPolicy::isClassIncludedBase)
+                        .filter(c -> !(classesOrPackagesToIgnore.contains(c.getPackageName()) || classesOrPackagesToIgnore.contains(c.getName())))
+                        .sorted(Comparator.comparing(ReflectionUtil::getClassHierarchyDepth).reversed())
+                        .forEach(c -> ImageSingletons.lookup(RuntimeReflectionSupport.class).registerClassFully(ConfigurationCondition.alwaysTrue(), c));
+        for (String className : classLoaderSupport.getClassNamesToPreserve()) {
+            RuntimeReflection.registerClassLookup(className);
+        }
+        // GR-64784
+        // loader.classLoaderSupport.getClassesToPreserve().forEach(RuntimeSerialization::register);
+    }
+
+    private static Set<String> ignoredClassesOrPackagesForPreserve() {
+        Set<String> ignoredClassesOrPackages = new HashSet<>(SubstrateOptions.IgnorePreserveForClasses.getValue().valuesAsSet());
+        // GR-63360: Parsing of constant_ lambda forms fails
+        ignoredClassesOrPackages.add("java.lang.invoke.LambdaForm$Holder");
+        return Collections.unmodifiableSet(ignoredClassesOrPackages);
     }
 }

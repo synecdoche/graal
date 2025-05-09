@@ -41,6 +41,7 @@
 package org.graalvm.nativeimage.impl;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
@@ -54,6 +55,10 @@ public interface RuntimeReflectionSupport extends ReflectionRegistry {
     void registerAllDeclaredMethodsQuery(ConfigurationCondition condition, boolean queriedOnly, Class<?> clazz);
 
     void registerAllFields(ConfigurationCondition condition, Class<?> clazz);
+
+    void registerAllFieldsQueryFlag(ConfigurationCondition condition, Class<?> clazz);
+
+    void registerAllMethodsQueryFlag(ConfigurationCondition condition, Class<?> clazz);
 
     void registerAllDeclaredFields(ConfigurationCondition condition, Class<?> clazz);
 
@@ -75,14 +80,24 @@ public interface RuntimeReflectionSupport extends ReflectionRegistry {
 
     void registerClassLookupException(ConfigurationCondition condition, String typeName, Throwable t);
 
+    /**
+     * This method registers the class fully for reflection except:
+     * <li>it does not register fields of super types</li>
+     * <li>it does not register methods of super types</li>
+     * <li>it does not register the class for serialization (GR-64784)</li>
+     * 
+     * The exceptions are there for the preserve mode where we know that the whole class hierarchy
+     * will be visited and registering super elements is not necessary.
+     */
     default void registerClassFully(ConfigurationCondition condition, Class<?> clazz) {
         register(condition, false, clazz);
 
-        // GR-62143 Register all fields is very slow.
-        // registerAllDeclaredFields(condition, clazz);
-        // registerAllFields(condition, clazz);
+        registerAllDeclaredFields(condition, clazz);
+
+        // we register the query only to avoid traversing the whole hierarchy
+        registerAllFieldsQueryFlag(condition, clazz);
         registerAllDeclaredMethodsQuery(condition, false, clazz);
-        registerAllMethodsQuery(condition, false, clazz);
+        registerAllMethodsQueryFlag(condition, clazz);
         registerAllDeclaredConstructorsQuery(condition, false, clazz);
         registerAllConstructorsQuery(condition, false, clazz);
         registerAllClassesQuery(condition, clazz);
@@ -106,19 +121,15 @@ public interface RuntimeReflectionSupport extends ReflectionRegistry {
             for (Constructor<?> declaredConstructor : clazz.getDeclaredConstructors()) {
                 RuntimeJNIAccess.register(declaredConstructor);
             }
-            // GR-62143 Registering all fields is very slow.
-            // for (Field declaredField : clazz.getDeclaredFields()) {
-            // RuntimeJNIAccess.register(declaredField);
-            // RuntimeReflection.register(declaredField);
-            // }
+            for (Field declaredField : clazz.getDeclaredFields()) {
+                RuntimeJNIAccess.register(declaredField);
+                register(condition, false, declaredField);
+            }
         } catch (LinkageError e) {
             /* If we can't link we can not register for JNI */
         }
 
-        // GR-62143 Registering all fields is very slow.
-        // RuntimeSerialization.register(clazz);
-
-        // if we register unsafe allocated earlier there are build-time initialization errors
+        // if we register as unsafe allocated earlier there are build-time initialization errors
         register(condition, !(clazz.isArray() || clazz.isInterface() || clazz.isPrimitive() || Modifier.isAbstract(clazz.getModifiers())), clazz);
     }
 }
