@@ -98,9 +98,10 @@ public class ExceptionHandlerReachabilityTest extends GraalCompilerTest implemen
     @Override
     public byte[] generateClass(String className) {
         ClassDesc classSharedExceptionHandlerClass = cd(SharedExceptionHandlerClass.class);
+        MethodTypeDesc mtdII = MethodTypeDesc.of(CD_int, CD_int);
 
         return ClassFile.of().build(ClassDesc.of(className), classBuilder -> classBuilder
-                        .withMethodBody("sharedExceptionHandlerMethod", MethodTypeDesc.of(CD_int, CD_int), ACC_PUBLIC_STATIC, b -> {
+                        .withMethodBody("sharedExceptionHandlerMethod", mtdII, ACC_PUBLIC_STATIC, b -> {
                             Label handlerEx1 = b.newLabel();
                             b
                                             .iload(0)
@@ -108,13 +109,13 @@ public class ExceptionHandlerReachabilityTest extends GraalCompilerTest implemen
                                             .trying(tryBlock -> {
                                                 tryBlock
                                                                 .iload(1)
-                                                                .invokestatic(classSharedExceptionHandlerClass, "foo", MethodTypeDesc.of(CD_int, CD_int))
+                                                                .invokestatic(classSharedExceptionHandlerClass, "foo", mtdII)
                                                                 .istore(1);
                                             }, catchBuilder -> catchBuilder.catching(cd(IllegalArgumentException.class), catchBlock -> {
                                                 catchBlock
                                                                 .labelBinding(handlerEx1)
                                                                 .iload(1)
-                                                                .invokestatic(classSharedExceptionHandlerClass, "baz", MethodTypeDesc.of(CD_int, CD_int))
+                                                                .invokestatic(classSharedExceptionHandlerClass, "baz", mtdII)
                                                                 .istore(1)
                                                                 .iload(1)
                                                                 .ireturn();
@@ -122,12 +123,12 @@ public class ExceptionHandlerReachabilityTest extends GraalCompilerTest implemen
                                             .trying(tryBlock -> {
                                                 tryBlock
                                                                 .iload(1)
-                                                                .invokestatic(classSharedExceptionHandlerClass, "bar", MethodTypeDesc.of(CD_int, CD_int))
+                                                                .invokestatic(classSharedExceptionHandlerClass, "bar", mtdII)
                                                                 .istore(1);
                                             }, catchBuilder -> catchBuilder.catching(cd(NumberFormatException.class), catchBlock -> {
                                                 catchBlock
                                                                 .iload(1)
-                                                                .invokestatic(classSharedExceptionHandlerClass, "doSomething", MethodTypeDesc.of(CD_int, CD_int))
+                                                                .invokestatic(classSharedExceptionHandlerClass, "doSomething", mtdII)
                                                                 .istore(1)
                                                                 .goto_(handlerEx1);
                                             }))

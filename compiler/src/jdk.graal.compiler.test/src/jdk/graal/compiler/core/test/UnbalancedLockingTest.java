@@ -136,7 +136,7 @@ public class UnbalancedLockingTest extends GraalCompilerTest implements Customiz
         b
                         .iload(0)
                         .bipush(12)
-                        .ifThenElse(Opcode.IF_ICMPGE,
+                        .ifThenElse(Opcode.IF_ICMPGT,
                                         thenBlock -> thenBlock.aload(2).astore(6),
                                         elseBlock -> elseBlock.aload(3).astore(6))
                         .iconst_0()

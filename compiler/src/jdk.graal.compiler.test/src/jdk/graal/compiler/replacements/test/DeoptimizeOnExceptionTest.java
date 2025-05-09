@@ -103,6 +103,8 @@ public class DeoptimizeOnExceptionTest extends GraalCompilerTest implements Cust
     }
 
     public static void methodB() {
+        // Application code to be compiled. No need to use
+        // GraalCompilerTest.getRandomInstance()
         Random r = new Random(System.currentTimeMillis());
         while (r.nextFloat() > .03f) {
             // Empty
@@ -112,6 +114,8 @@ public class DeoptimizeOnExceptionTest extends GraalCompilerTest implements Cust
     }
 
     public static void methodA() {
+        // Application code to be compiled. No need to use
+        // GraalCompilerTest.getRandomInstance()
         Random r = new Random(System.currentTimeMillis());
         while (r.nextDouble() > .05) {
             // Empty

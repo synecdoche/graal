@@ -117,7 +117,7 @@ public class LargeConstantSectionTest extends JTTTest {
 
                                     for (int i = 0; i < cases.size(); i++) {
                                         b.labelBinding(cases.get(i).target())
-                                                        .ldc(Long.valueOf(0xF0F0F0F0F0L + i))
+                                                        .ldc(Long.valueOf(LARGE_CONSTANT + i))
                                                         .lreturn();
                                     }
 

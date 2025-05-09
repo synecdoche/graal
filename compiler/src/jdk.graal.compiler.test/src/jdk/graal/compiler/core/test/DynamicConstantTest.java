@@ -133,18 +133,18 @@ public class DynamicConstantTest extends GraalCompilerTest {
                 // Example: int DynamicConstantTest.getIntBSM(MethodHandles.Lookup l, String name,
                 // Class<?> type)
                 String sig = "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;)" + desc;
-                var condy = DynamicConstantDesc.ofNamed(MethodHandleDesc.of(Kind.STATIC, outerClass, getter + "BSM", sig), "consnt", type);
+                var condy = DynamicConstantDesc.ofNamed(MethodHandleDesc.of(Kind.STATIC, outerClass, getter + "BSM", sig), "const", type);
                 b.ldc(condy).return_(TypeKind.from(type));
             } else if (condyType == CondyType.CALL_INDIRECT_BSM) {
                 // Example: int DynamicConstantTest.getInt()
-                var condy = DynamicConstantDesc.ofNamed(ConstantDescs.BSM_INVOKE, "consnt", type, MethodHandleDesc.of(Kind.STATIC, outerClass, getter, "()" + desc));
+                var condy = DynamicConstantDesc.ofNamed(ConstantDescs.BSM_INVOKE, "const", type, MethodHandleDesc.of(Kind.STATIC, outerClass, getter, "()" + desc));
                 b.ldc(condy).return_(TypeKind.from(type));
             } else {
                 assert condyType == CondyType.CALL_INDIRECT_WITH_ARGS_BSM;
                 // Example: int DynamicConstantTest.getInt()
-                var condy1 = DynamicConstantDesc.ofNamed(ConstantDescs.BSM_INVOKE, "consnt1", type, MethodHandleDesc.of(Kind.STATIC, outerClass, getter, "()" + desc));
+                var condy1 = DynamicConstantDesc.ofNamed(ConstantDescs.BSM_INVOKE, "const1", type, MethodHandleDesc.of(Kind.STATIC, outerClass, getter, "()" + desc));
                 // Example: int DynamicConstantTest.getInt(int v1, int v2)
-                var condy2 = DynamicConstantDesc.ofNamed(ConstantDescs.BSM_INVOKE, "consnt2", type, MethodHandleDesc.of(Kind.STATIC, outerClass, getter, "(" + desc + desc + ")" + desc), condy1,
+                var condy2 = DynamicConstantDesc.ofNamed(ConstantDescs.BSM_INVOKE, "const2", type, MethodHandleDesc.of(Kind.STATIC, outerClass, getter, "(" + desc + desc + ")" + desc), condy1,
                                 condy1);
                 b.ldc(condy2).return_(TypeKind.from(type));
             }
