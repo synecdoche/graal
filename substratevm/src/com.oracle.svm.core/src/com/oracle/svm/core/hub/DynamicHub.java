@@ -1587,21 +1587,21 @@ public final class DynamicHub implements AnnotatedElement, java.lang.reflect.Typ
     private native Constructor<?> getEnclosingConstructor();
 
     @Substitute
-    @NeverInlineTrivial(value = "Used in dynamic access call usage analysis: DynamicAccessDetectionPhase", onlyWith = TrackDynamicAccessEnabled.class)
+    @NeverInlineTrivial(reason = "Used in dynamic access call usage analysis: DynamicAccessDetectionPhase", onlyWith = TrackDynamicAccessEnabled.class)
     @CallerSensitive
     private static Class<?> forName(String className) throws Throwable {
         return forName(className, Reflection.getCallerClass());
     }
 
     @Substitute
-    @NeverInlineTrivial(value = "Used in dynamic access call usage analysis: DynamicAccessDetectionPhase", onlyWith = TrackDynamicAccessEnabled.class)
+    @NeverInlineTrivial(reason = "Used in dynamic access call usage analysis: DynamicAccessDetectionPhase", onlyWith = TrackDynamicAccessEnabled.class)
     @CallerSensitiveAdapter
     private static Class<?> forName(String className, Class<?> caller) throws Throwable {
         return forName(className, true, caller == null ? ClassLoader.getSystemClassLoader() : caller.getClassLoader(), caller);
     }
 
     @Substitute
-    @NeverInlineTrivial(value = "Used in dynamic access call usage analysis: DynamicAccessDetectionPhase", onlyWith = TrackDynamicAccessEnabled.class)
+    @NeverInlineTrivial(reason = "Used in dynamic access call usage analysis: DynamicAccessDetectionPhase", onlyWith = TrackDynamicAccessEnabled.class)
     @CallerSensitive
     private static Class<?> forName(Module module, String className) throws Throwable {
         return forName(module, className, Reflection.getCallerClass());
@@ -1621,7 +1621,7 @@ public final class DynamicHub implements AnnotatedElement, java.lang.reflect.Typ
     }
 
     @Substitute
-    @NeverInlineTrivial(value = "Used in dynamic access call usage analysis: DynamicAccessDetectionPhase", onlyWith = TrackDynamicAccessEnabled.class)
+    @NeverInlineTrivial(reason = "Used in dynamic access call usage analysis: DynamicAccessDetectionPhase", onlyWith = TrackDynamicAccessEnabled.class)
     @CallerSensitive
     private static Class<?> forName(String name, boolean initialize, ClassLoader loader) throws Throwable {
         return forName(name, initialize, loader, Reflection.getCallerClass());

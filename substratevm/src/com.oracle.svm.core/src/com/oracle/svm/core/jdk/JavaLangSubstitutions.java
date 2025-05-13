@@ -404,7 +404,7 @@ final class Target_java_lang_System {
     }
 
     @Substitute
-    @NeverInlineTrivial(value = "Used in 'java.home' access analysis: AnalyzeJavaHomeAccessPhase", onlyWith = AnalyzeJavaHomeAccessEnabled.class)
+    @NeverInlineTrivial(reason = "Used in 'java.home' access analysis: AnalyzeJavaHomeAccessPhase", onlyWith = AnalyzeJavaHomeAccessEnabled.class)
     private static String getProperty(String key) {
         checkKey(key);
         return SystemPropertiesSupport.singleton().getCurrentProperty(key);
@@ -417,7 +417,7 @@ final class Target_java_lang_System {
     }
 
     @Substitute
-    @NeverInlineTrivial(value = "Used in 'java.home' access analysis: AnalyzeJavaHomeAccessPhase", onlyWith = AnalyzeJavaHomeAccessEnabled.class)
+    @NeverInlineTrivial(reason = "Used in 'java.home' access analysis: AnalyzeJavaHomeAccessPhase", onlyWith = AnalyzeJavaHomeAccessEnabled.class)
     private static String getProperty(String key, String def) {
         checkKey(key);
         return SystemPropertiesSupport.singleton().getCurrentProperty(key, def);

@@ -45,7 +45,7 @@ public @interface NeverInlineTrivial {
     /**
      * Documents the reason why the annotated code must not be inlined.
      */
-    String value();
+    String reason();
 
     /**
      * Prevent inlining only if all of the provided predicates are true (default: a predicate that
