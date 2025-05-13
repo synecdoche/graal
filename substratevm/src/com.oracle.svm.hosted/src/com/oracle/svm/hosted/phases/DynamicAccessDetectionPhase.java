@@ -233,7 +233,7 @@ public class DynamicAccessDetectionPhase extends BasePhase<CoreProviders> {
     private static MethodInfo getMethodInfo(MethodCallTargetNode callTarget) {
         Class<?> declaringClass = OriginalClassProvider.getJavaClass(callTarget.targetMethod().getDeclaringClass());
         if (!reflectionMethodSignatures.containsKey(declaringClass) &&
-                !resourceMethodSignatures.containsKey(declaringClass)) {
+                        !resourceMethodSignatures.containsKey(declaringClass)) {
             return null;
         }
 
@@ -248,10 +248,10 @@ public class DynamicAccessDetectionPhase extends BasePhase<CoreProviders> {
         MethodSignature methodSignature = new MethodSignature(methodName, paramTypes);
 
         if (reflectionMethodSignatures.containsKey(declaringClass) &&
-                reflectionMethodSignatures.get(declaringClass).contains(methodSignature)) {
+                        reflectionMethodSignatures.get(declaringClass).contains(methodSignature)) {
             return new MethodInfo(DynamicAccessKind.Reflection, declaringClass.getName() + "#" + methodSignature);
         } else if (resourceMethodSignatures.containsKey(declaringClass) &&
-                resourceMethodSignatures.get(declaringClass).contains(methodSignature)) {
+                        resourceMethodSignatures.get(declaringClass).contains(methodSignature)) {
             return new MethodInfo(DynamicAccessKind.Resource, declaringClass.getName() + "#" + methodSignature);
         }
 

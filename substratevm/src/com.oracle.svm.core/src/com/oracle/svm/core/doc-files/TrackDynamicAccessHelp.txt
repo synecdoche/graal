@@ -1,4 +1,4 @@
-Report all method calls requiring metadata for dynamic access in the reachable parts of the project.
+Reports all reflection (e.g., Class#forName(String)) and resource (e.g., Class#getResource(String)) calls in reachable code that require metadata for dynamic access.
 The analysis is limited to the provided comma-separated list of class-path entries, and module or package names.
 If any dynamic access calls are found, a "dynamic-access" directory is created in the native image output,
 and the calls are serialized in "dynamic-access/<entry-name>/[reflection-calls.json][resource-calls.json]".

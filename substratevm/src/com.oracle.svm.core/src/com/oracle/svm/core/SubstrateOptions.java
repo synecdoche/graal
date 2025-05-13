@@ -1471,6 +1471,7 @@ public class SubstrateOptions {
             UserError.guarantee(!PLTGOTConfiguration.isEnabled(), "%s cannot be used together with PLT/GOT.", enabledOption);
         }
     }
+
     @Option(help = "file:doc-files/TrackDynamicAccessHelp.txt")//
     public static final HostedOptionKey<AccumulatingLocatableMultiOptionValue.Strings> TrackDynamicAccess = new HostedOptionKey<>(
                     AccumulatingLocatableMultiOptionValue.Strings.buildWithCommaDelimiter()) {
