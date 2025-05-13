@@ -35,6 +35,7 @@ import jdk.graal.compiler.nodes.java.MethodCallTargetNode;
 import jdk.graal.compiler.nodes.spi.CoreProviders;
 import jdk.graal.compiler.phases.BasePhase;
 import jdk.vm.ci.meta.JavaType;
+import jdk.vm.ci.meta.ResolvedJavaMethod;
 import jdk.vm.ci.meta.Signature;
 
 import java.io.ObjectInputStream;
@@ -86,9 +87,6 @@ public class DynamicAccessDetectionPhase extends BasePhase<CoreProviders> {
 
     public record MethodInfo(DynamicAccessKind accessKind, String signature) {
     }
-
-    // For parsing of DynamicNewArrayNode-s
-    private static final String arrayNewInstanceSignature = "java.lang.reflect.Array#newInstance(java.lang.Class, int)";
 
     private static final Map<Class<?>, Set<MethodSignature>> reflectionMethodSignatures = new HashMap<>();
     private static final Map<Class<?>, Set<MethodSignature>> resourceMethodSignatures = new HashMap<>();
@@ -146,6 +144,7 @@ public class DynamicAccessDetectionPhase extends BasePhase<CoreProviders> {
                         new MethodSignature("findSystemClass", String.class),
                         new MethodSignature("findBootstrapClassOrNull", String.class)));
         reflectionMethodSignatures.put(Array.class, Set.of(
+                        new MethodSignature("newInstance", Class.class, int.class),
                         new MethodSignature("newInstance", Class.class, int[].class)));
         reflectionMethodSignatures.put(Constructor.class, Set.of(
                         new MethodSignature("newInstance", Object[].class)));
@@ -201,47 +200,42 @@ public class DynamicAccessDetectionPhase extends BasePhase<CoreProviders> {
         }
 
         for (Node node : graph.getNodes()) {
-            DynamicAccessKind accessKind;
-            String methodSignature;
+            MethodInfo methodInfo = null;
             if (node instanceof MethodCallTargetNode callTarget) {
-                MethodInfo methodInfo = getMethodInfo(callTarget);
-                if (methodInfo == null) {
-                    continue;
-                }
-                accessKind = methodInfo.accessKind();
-                methodSignature = methodInfo.signature();
-            } else if (node instanceof DynamicNewArrayNode) {
-                accessKind = DynamicAccessKind.Reflection;
-                methodSignature = arrayNewInstanceSignature;
-            } else {
+                methodInfo = getMethodInfo(callTarget.targetMethod());
+            } else if (node instanceof DynamicNewArrayNode && node.getNodeSourcePosition() != null) {
+                methodInfo = getMethodInfo(node.getNodeSourcePosition().getMethod());
+            }
+
+            if (methodInfo == null) {
                 continue;
             }
 
             NodeSourcePosition nspToShow = getRootSourcePosition(node.getNodeSourcePosition());
             if (nspToShow != null && !dynamicAccessDetectionFeature.containsFoldEntry(nspToShow.getBCI(), nspToShow.getMethod())) {
                 String callLocation = nspToShow.getMethod().asStackTraceElement(nspToShow.getBCI()).toString();
-                dynamicAccessDetectionFeature.addCall(sourceEntry, accessKind, methodSignature, callLocation);
+                dynamicAccessDetectionFeature.addCall(sourceEntry, methodInfo.accessKind(), methodInfo.signature(), callLocation);
             }
         }
     }
 
     /*
      * Returns the name, parameter types and dynamic access kind (reflective or resource) of a
-     * method if it exists in the predetermined set, based on its graph and MethodCallTargetNode;
+     * method if it exists in the predetermined set, based on its graph and Node;
      * otherwise, returns null.
      */
-    private static MethodInfo getMethodInfo(MethodCallTargetNode callTarget) {
-        Class<?> declaringClass = OriginalClassProvider.getJavaClass(callTarget.targetMethod().getDeclaringClass());
+    private static MethodInfo getMethodInfo(ResolvedJavaMethod method) {
+        Class<?> declaringClass = OriginalClassProvider.getJavaClass(method.getDeclaringClass());
         if (!reflectionMethodSignatures.containsKey(declaringClass) &&
                         !resourceMethodSignatures.containsKey(declaringClass)) {
             return null;
         }
 
-        String methodName = callTarget.targetMethod().getName();
-        Signature signature = callTarget.targetMethod().getSignature();
+        String methodName = method.getName();
+        Signature signature = method.getSignature();
         List<Class<?>> paramList = new ArrayList<>();
         for (int i = 0; i < signature.getParameterCount(false); i++) {
-            JavaType type = signature.getParameterType(i, callTarget.targetMethod().getDeclaringClass());
+            JavaType type = signature.getParameterType(i, method.getDeclaringClass());
             paramList.add(OriginalClassProvider.getJavaClass(type));
         }
         Class<?>[] paramTypes = paramList.toArray(new Class<?>[0]);
