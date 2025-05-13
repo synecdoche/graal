@@ -224,7 +224,7 @@ public final class DynamicAccessDetectionFeature implements InternalFeature {
         }
     }
 
-    /*
+    /**
      * Support data structure used to keep track of calls which don't require metadata, but can't be
      * folded.
      */
@@ -255,11 +255,16 @@ public final class DynamicAccessDetectionFeature implements InternalFeature {
         }
     }
 
+    /**
+     * We only add fold entries for methods registered by
+     * {@link com.oracle.svm.hosted.snippets.ReflectionPlugins#registerBulkInvocationPlugin}, as
+     * these represent methods that cannot be folded but also do not require metadata.
+     */
     public void addFoldEntry(int bci, ResolvedJavaMethod method) {
         foldEntries.add(new FoldEntry(bci, method));
     }
 
-    /*
+    /**
      * If a fold entry exists for the given method, the method should be ignored by the analysis
      * phase.
      */

@@ -219,10 +219,10 @@ public class DynamicAccessDetectionPhase extends BasePhase<CoreProviders> {
         }
     }
 
-    /*
+    /**
      * Returns the name, parameter types and dynamic access kind (reflective or resource) of a
-     * method if it exists in the predetermined set, based on its graph and Node;
-     * otherwise, returns null.
+     * method if it exists in the predetermined set, based on its graph and Node; otherwise, returns
+     * null.
      */
     private static MethodInfo getMethodInfo(ResolvedJavaMethod method) {
         Class<?> declaringClass = OriginalClassProvider.getJavaClass(method.getDeclaringClass());
@@ -252,7 +252,7 @@ public class DynamicAccessDetectionPhase extends BasePhase<CoreProviders> {
         return null;
     }
 
-    /*
+    /**
      * Returns the class path entry, module or package name of the caller class if it is included in
      * the value specified by the option, otherwise returns null.
      */
