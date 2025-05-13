@@ -18,6 +18,7 @@ This changelog summarizes major changes to GraalVM Native Image.
 * (GR-63494) Recurring callback support is no longer enabled by default. If this feature is needed, please specify `-H:+SupportRecurringCallback` at image build-time.
 * (GR-60209) New syntax for configuration of the [Foreign Function & Memory API](https://github.com/oracle/graal/blob/master/docs/reference-manual/native-image/ForeignInterface.md)
 * (GR-64584) Experimental option `-H:+RelativeCodePointers` to significantly reduce relocation entries in position-independent executables and shared libraries.
+* (GR-64787) Enable `--install-exit-handlers` by default for executables and deprecate the option. If shared libraries were using this flag, the same functionality can be restored by using `-H:+InstallJavaExitHandlersForSharedLibrary`. 
 
 ## GraalVM for JDK 24 (Internal Version 24.2.0)
 * (GR-59717) Added `DuringSetupAccess.registerObjectReachabilityHandler` to allow registering a callback that is executed when an object of a specified type is marked as reachable during heap scanning.

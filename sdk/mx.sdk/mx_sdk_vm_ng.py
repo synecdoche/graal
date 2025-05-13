@@ -374,7 +374,7 @@ class LanguageLibraryProject(NativeImageLibraryProject):
         build_args += [
             '-R:+EnableSignalHandling',
             '-R:+InstallSegfaultHandler',
-            '--install-exit-handlers',
+            '-H:+UnlockExperimentalVMOptions', '-H:+InstallJavaExitHandlersForSharedLibrary', '-H:-UnlockExperimentalVMOptions'
         ]
 
         # Monitoring flags
